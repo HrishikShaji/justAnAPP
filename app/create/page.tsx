@@ -1,14 +1,12 @@
 "use client";
-import Header from "@/components/Header";
-import PostItem from "@/components/PostItem";
-import { useAppSelector } from "@/redux/store";
-import { useSession } from "next-auth/react";
-import Image from "next/image";
-import { useRouter } from "next/navigation";
+import React from "react";
 import { useEffect } from "react";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import PostForm from "@/components/PostForm";
 import ClipLoader from "react-spinners/ClipLoader";
 
-export default function Home() {
+const page = () => {
   const router = useRouter();
   const session = useSession();
 
@@ -27,14 +25,11 @@ export default function Home() {
   }
   if (session.status === "authenticated") {
     return (
-      <main className="mt-10 px-10 py-5  bg-neutral-900 h-full w-full flex flex-col gap-2">
-        <PostItem />
-        <PostItem />
-        <PostItem />
-        <PostItem />
-        <PostItem />
-        <PostItem />
-      </main>
+      <div className=" px-10 pt-20 pb-5 h-screen  bg-neutral-900">
+        <PostForm />
+      </div>
     );
   }
-}
+};
+
+export default page;
