@@ -7,6 +7,7 @@ import { useDispatch } from "react-redux";
 
 const AuthForm = () => {
   const [isLogin, setIsLogin] = useState<boolean>(true);
+  const [username, setUsername] = useState<string>("");
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [confirmPassword, setConfirmPassword] = useState<string>("");
@@ -18,10 +19,16 @@ const AuthForm = () => {
       const response = await signIn("credentials", { email, password });
       console.log(response);
     } else {
-      console.log("/api/auth/register", email, password, confirmPassword);
+      console.log(
+        "/api/auth/register",
+        username,
+        email,
+        password,
+        confirmPassword
+      );
       const response = await fetch(url, {
         method: "POST",
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ username, email, password }),
         headers: { "Content-Type": "application/json" },
       });
       await signIn("credentials", { email, password });
@@ -32,6 +39,14 @@ const AuthForm = () => {
   return (
     <div className="flex flex-col gap-4 items-center">
       <form onSubmit={handleSubmit} className="flex flex-col gap-2 w-full">
+        {!isLogin && (
+          <input
+            onChange={(e) => setUsername(e.target.value)}
+            type="text"
+            placeholder="username"
+            className="p-2 border-b-4 focus:outline-none border-white bg-transparent"
+          />
+        )}
         <input
           onChange={(e) => setEmail(e.target.value)}
           type="text"

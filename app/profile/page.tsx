@@ -7,6 +7,7 @@ import { useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import ClipLoader from "react-spinners/ClipLoader";
+import { Toaster } from "react-hot-toast";
 
 const page = () => {
   const router = useRouter();
@@ -27,10 +28,13 @@ const page = () => {
   }
   if (session.status === "authenticated") {
     return (
-      <div className="mt-10 px-10 py-5 flex flex-col gap-2 bg-neutral-900">
-        <UserBio />
-        <PostItem />
-      </div>
+      <>
+        <Toaster />
+        <div className="mt-10 px-10 py-5 flex flex-col gap-2 bg-neutral-900">
+          <UserBio />
+          <PostItem />
+        </div>
+      </>
     );
   }
 };

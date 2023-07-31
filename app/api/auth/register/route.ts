@@ -3,7 +3,7 @@ import prisma from "@/libs/prismadb";
 import bcrypt from "bcrypt";
 
 const handler = async (req: NextRequest, res: NextResponse) => {
-  const { email, password } = await req.json();
+  const { username, email, password } = await req.json();
 
   try {
     const user = await prisma.user.findUnique({
@@ -19,9 +19,11 @@ const handler = async (req: NextRequest, res: NextResponse) => {
     const hashedPassword = await bcrypt.hash(password, 12);
     await prisma.user.create({
       data: {
+        username: username,
         email: email,
         hashedPassword: hashedPassword,
-        image: "",
+        profileImage: "",
+        coverImage: "",
         emailVerified: new Date(),
       },
     });
