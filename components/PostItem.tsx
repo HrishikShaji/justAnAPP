@@ -1,27 +1,51 @@
-import React from "react";
+"use client";
+import React, { useState } from "react";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+import userImg from "@/public/images/user1.png";
+import { AiOutlineHeart, AiOutlineComment } from "react-icons/ai";
+import { MdSend } from "react-icons/md";
+import LikeComment from "./LikeComment";
 
-const PostItem = () => {
+interface PostItemProps {
+  id: string;
+  username: string;
+  createdAt: string;
+  body: string;
+  profileImage: string;
+}
+
+const PostItem: React.FC<PostItemProps> = ({
+  id,
+  username,
+  createdAt,
+  body,
+  profileImage,
+}) => {
+  const router = useRouter();
   return (
-    <div className="w-full  rounded-3xl bg-neutral-700 p-5 flex flex-col gap-8">
+    <div className="w-full   rounded-3xl bg-neutral-700 p-5 flex flex-col gap-4">
       <div className="flex gap-2 items-end">
-        <div className="h-14 w-14 rounded-full  bg-neutral-500" />
+        <div className="h-14 w-14 rounded-full  bg-neutral-500">
+          <Image
+            src={profileImage ? profileImage : userImg}
+            height={100}
+            width={100}
+            className="w-full h-full object-cover rounded-full"
+            alt="profile image"
+          />
+        </div>
         <div className="flex flex-col ">
-          <h1 className="font-semibold">Username</h1>
-          <span className="text-xs font-semibold">Time Posted</span>
+          <h1 className="font-semibold">{username}</h1>
+          <span className="text-xs font-semibold">{createdAt}</span>
         </div>
       </div>
-      <div>
-        <p>
-          'Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean
-          commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus
-          et magnis dis parturient montes, nascetur ridiculus mus. Donec quam
-          felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla
-          consequat massa quis enim. Donec pede justo, fringilla vel, aliquet
-          nec, vulputate eget, arcu. In enim justo, rhoncus ut, imperdiet a,
-          venenatis vitae, justo. Nullam dictum felis eu pede mollis pretium.
-          Integer tincidunt. Cras dapibus. Vivamus elementum '
-        </p>
+      <div
+        onClick={() => router.push(`/post/${id}`)}
+        className="cursor-pointer">
+        <p>{body}</p>
       </div>
+      <LikeComment />
     </div>
   );
 };

@@ -16,6 +16,12 @@ interface Password {
   newPassword: string;
 }
 
+interface Username {
+  id: string;
+  isAuth?: boolean;
+  username: string;
+}
+
 interface Email {
   id: string;
   isAuth?: boolean;
@@ -28,6 +34,12 @@ interface Image {
   image: string;
 }
 
+interface Post {
+  id: string;
+  isAuth?: boolean;
+  body: string;
+}
+
 export const apiSlice = createApi({
   reducerPath: "apiSlice",
   baseQuery: fetchBaseQuery({ baseUrl: "/api/" }),
@@ -35,18 +47,22 @@ export const apiSlice = createApi({
     getUser: builder.query<User, string>({
       query: (id) => `/user?id=${id}`,
     }),
-    updateUsername: builder.mutation<void, User>({
-      query: (user: User) => ({
-        url: `/user?id=${user.id}`,
-        method: "PATCH",
-        body: { username: user.username },
+    updateUsername: builder.mutation<void, Username>({
+      query: (user: Username) => ({
+        url: `/user?endpoint=updateUsername`,
+        method: "PUT",
+        body: {
+          id: user.id,
+          username: user.username,
+        },
       }),
     }),
     updatePassword: builder.mutation<void, Password>({
       query: (password: Password) => ({
-        url: `/user?id=${password.id}`,
-        method: "PATCH",
+        url: `/user?endpoint=updatePassword`,
+        method: "PUT",
         body: {
+          id: password.id,
           currentPassword: password.currentPassword,
           newPassword: password.newPassword,
         },
@@ -54,23 +70,48 @@ export const apiSlice = createApi({
     }),
     updateEmail: builder.mutation<void, Email>({
       query: (email: Email) => ({
-        url: `/user?=${email.id}`,
-        method: "PATCH",
-        body: { email: email.email },
+        url: `/user?endpoint=updateEmail`,
+        method: "PUT",
+        body: {
+          id: email.id,
+          email: email.email,
+        },
       }),
     }),
     updateProfileImage: builder.mutation<void, Image>({
       query: (image: Image) => ({
-        url: `/user?id=${image.id}`,
-        method: "PATCH",
-        body: { profileImage: image.image },
+        url: `/user?endpoint=updateProfileImage`,
+        method: "PUT",
+        body: {
+          id: image.id,
+          profileImage: image.image,
+        },
       }),
     }),
     updateCoverImage: builder.mutation<void, Image>({
       query: (image: Image) => ({
-        url: `/user?id=${image.id}`,
-        method: "PATCH",
-        body: { coverImage: image.image },
+        url: `/user?endpoint=updateCoverImage`,
+        method: "PUT",
+        body: {
+          id: image.id,
+          coverImage: image.image,
+        },
+      }),
+    }),
+    getPost: builder.query<any, string>({
+      query: (id: string) => `/posts?postId=${id}`,
+    }),
+    getPosts: builder.query<any, void>({
+      query: () => "/posts?endpoint=getPosts",
+    }),
+    getUserPosts: builder.query<any, string>({
+      query: (id: string) => `/posts?endpoint=getPosts&userId=${id}`,
+    }),
+    addPost: builder.mutation<void, Post>({
+      query: (post: Post) => ({
+        url: "/posts?endpoint=addPost",
+        method: "POST",
+        body: { id: post.id, body: post.body },
       }),
     }),
   }),
@@ -83,4 +124,8 @@ export const {
   useUpdateEmailMutation,
   useUpdateProfileImageMutation,
   useUpdateCoverImageMutation,
+  useGetPostQuery,
+  useAddPostMutation,
+  useGetPostsQuery,
+  useGetUserPostsQuery,
 } = apiSlice;

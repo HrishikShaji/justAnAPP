@@ -5,6 +5,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import PostForm from "@/components/PostForm";
 import ClipLoader from "react-spinners/ClipLoader";
+import { Toaster } from "react-hot-toast";
 
 const page = () => {
   const router = useRouter();
@@ -25,9 +26,12 @@ const page = () => {
   }
   if (session.status === "authenticated") {
     return (
-      <div className=" px-10 pt-20 pb-5 h-screen  bg-neutral-900">
-        <PostForm />
-      </div>
+      <>
+        <Toaster />
+        <div className=" px-10 pt-20 pb-5 h-screen  bg-neutral-900">
+          <PostForm />
+        </div>
+      </>
     );
   }
 };

@@ -6,6 +6,7 @@ import { useDispatch } from "react-redux";
 import { AppDispatch, useAppSelector } from "@/redux/store";
 import { onOpen } from "@/redux/slices/ModalSlice";
 import {
+  useGetUserPostsQuery,
   useGetUserQuery,
   useUpdateCoverImageMutation,
   useUpdateProfileImageMutation,
@@ -14,6 +15,8 @@ import { useSession } from "next-auth/react";
 import { signOut } from "next-auth/react";
 import ClipLoader from "react-spinners/ClipLoader";
 import UploadImage from "./UploadImage";
+import Image from "next/image";
+import userImg from "@/public/images/user1.png";
 
 const UserBio = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -34,20 +37,44 @@ const UserBio = () => {
   return (
     <div className="w-full p-5 bg-neutral-700 rounded-3xl flex flex-col justify-center relative items-center">
       <div className="w-full rounded-3xl bg-neutral-600 overflow-hidden  flex justify-center h-[200px]">
-        <UploadImage
-          value={data?.coverImage}
-          updateField="coverImage"
-          id={session.data?.user as string}
-          handleUpdate={updateCoverImage}
-        />
+        {isSuccess && (
+          <Image
+            src={data?.coverImage ? data.coverImage : userImg}
+            height={100}
+            width={100}
+            alt="avatar"
+            className="w-full h-full object-cover"
+          />
+        )}
+
+        <div className="absolute top-8 right-8">
+          <UploadImage
+            value={data?.coverImage}
+            updateField="coverImage"
+            id={session.data?.user as string}
+            handleUpdate={updateCoverImage}
+          />
+        </div>
       </div>
-      <div className="absolute top-[100px] z-20 bg-neutral-500 w-40 h-40 rounded-full flex justify-center overflow-hidden items-center ">
-        <UploadImage
-          value={data?.profileImage}
-          updateField="profileImage"
-          id={session.data?.user as string}
-          handleUpdate={updateProfileImage}
-        />
+      <div className="absolute top-[100px] z-20 bg-neutral-500 w-40 h-40 rounded-full flex justify-center  items-center ">
+        {isSuccess && (
+          <Image
+            src={data?.profileImage ? data.profileImage : userImg}
+            height={100}
+            width={100}
+            alt="avatar"
+            className="w-full h-full object-cover rounded-full"
+          />
+        )}
+
+        <div className="absolute top-3 right-3">
+          <UploadImage
+            value={data?.profileImage}
+            updateField="profileImage"
+            id={session.data?.user as string}
+            handleUpdate={updateProfileImage}
+          />
+        </div>
       </div>
       <div className="w-full text-white mt-[50px] gap-4 flex flex-col justify-center items-center  ">
         <div className="flex flex-col items-center">

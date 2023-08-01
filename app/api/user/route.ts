@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/libs/prismadb";
 import bcrypt from "bcrypt";
+import { request } from "http";
 
 export const GET = async (req: NextRequest, res: NextResponse) => {
   const id = req.nextUrl.searchParams.get("id");
@@ -19,87 +20,125 @@ export const GET = async (req: NextRequest, res: NextResponse) => {
     });
 
     return NextResponse.json(user);
-  } catch (error) {
-    return NextResponse.json(error);
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 };
 
-export const PATCH = async (req: NextRequest, res: NextResponse) => {
-  const id = req.nextUrl.searchParams.get("id");
-  const data = await req.json();
-  console.log("from update user", id, data?.username, data?.email);
-  try {
-    let updateData = {};
-    if (data.username) {
-      updateData = { username: data.username };
-    } else if (data.profileImage) {
-      console.log("profileImage updation ran");
-      updateData = { profileImage: data.profileImage };
-    } else if (data.coverImage) {
-      console.log("coverImage updation ran");
-      updateData = { coverImage: data.coverImage };
-    } else if (data.email) {
-      const user = await prisma.user.findUnique({
-        where: {
-          email: data.email,
-        },
-      });
+const handler = async (request: NextRequest) => {
+  const endpoint = request.nextUrl.searchParams.get("endpoint");
 
-      if (user && user.email !== id) {
-        throw new Error("Email exists");
-      }
-      console.log(user);
-      updateData = { email: data.email };
-    } else if (data.currentPassword && data.newPassword) {
-      console.log(
-        "current password:",
-        data.currentPassword,
-        "New Password:",
-        data.newPassword
-      );
-
-      const user = await prisma.user.findUnique({
-        where: {
-          id: id as string,
-        },
-      });
-
-      if (!user || !user.hashedPassword) {
-        throw Error("Invalid id");
-      }
-
-      const isPasswordCorrect = await bcrypt.compare(
-        data.currentPassword,
-        user.hashedPassword
-      );
-      console.log(isPasswordCorrect);
-      if (!isPasswordCorrect) {
-        return NextResponse.json(
-          {
-            message: "Please enter title",
-          },
-          {
-            status: 401,
-          }
-        );
-      }
-
-      const hashedPassword = await bcrypt.hash(data.newPassword, 12);
-
-      updateData = { hashedPassword: hashedPassword };
-    } else {
-      throw new Error("Error");
+  if (request.method === "PUT") {
+    switch (endpoint) {
+      case "updateUsername":
+        return updateUsername(request);
+      case "updateProfileImage":
+        return updateProfileImage(request);
+      case "updateCoverImage":
+        return updateCoverImage(request);
+      case "updatePassword":
+        return updatePassword(request);
+      default:
+        break;
     }
-    console.log("update data is", updateData);
+  }
+};
+
+export const updateUsername = async (request: NextRequest) => {
+  const { id, username } = await request.json();
+  console.log("this ran", id, username);
+  try {
     await prisma.user.update({
       where: {
         id: id as string,
       },
-      data: updateData,
+      data: {
+        username: username,
+      },
     });
-
     return NextResponse.json({ message: "success" });
-  } catch (error) {
-    throw new Error("error");
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 };
+
+export const updateProfileImage = async (request: NextRequest) => {
+  const { id, profileImage } = await request.json();
+  console.log("this ran", id, profileImage);
+  try {
+    await prisma.user.update({
+      where: {
+        id: id as string,
+      },
+      data: {
+        profileImage: profileImage,
+      },
+    });
+    return NextResponse.json({ message: "success" });
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+};
+
+export const updateCoverImage = async (request: NextRequest) => {
+  const { id, coverImage } = await request.json();
+  console.log("this ran", id, coverImage);
+  try {
+    await prisma.user.update({
+      where: {
+        id: id as string,
+      },
+      data: {
+        coverImage: coverImage,
+      },
+    });
+    return NextResponse.json({ message: "success" });
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+};
+
+export const updatePassword = async (req: NextRequest) => {
+  const { currentPassword, newPassword, id } = await req.json();
+  console.log(currentPassword, newPassword, id);
+  try {
+    const user = await prisma.user.findUnique({
+      where: {
+        id: id as string,
+      },
+    });
+
+    if (!user || !user.hashedPassword) {
+      throw new Error("Invalid id");
+    }
+
+    const isPasswordCorrect = await bcrypt.compare(
+      currentPassword,
+      user.hashedPassword
+    );
+
+    if (!isPasswordCorrect) {
+      return NextResponse.json(
+        { error: "Password does not match" },
+        { status: 400 }
+      );
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 12);
+
+    await prisma.user.update({
+      where: {
+        id: id as string,
+      },
+      data: {
+        hashedPassword: hashedPassword,
+      },
+    });
+
+    return NextResponse.json("success");
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+};
+
+export { handler as POST, handler as PUT };

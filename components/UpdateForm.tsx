@@ -10,6 +10,7 @@ import { useSession } from "next-auth/react";
 import React, { FormEvent, useState, useEffect } from "react";
 import { toast } from "react-hot-toast";
 import { BiSolidDownArrow } from "react-icons/bi";
+import ClipLoader from "react-spinners/ClipLoader";
 
 const UpdateForm = () => {
   const session = useSession();
@@ -26,17 +27,25 @@ const UpdateForm = () => {
   const [newPassword, setNewPassword] = useState<string>("");
   const [confirmPassword, setConfirmPassword] = useState<string>("");
   const [email, setEmail] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(false);
 
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+  const handleUsernameUpdate = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const data = {
       id: session?.data?.user as string,
       username: username,
     };
 
-    await updateUsername(data);
-    refetch();
-    toast.success("username updated");
+    try {
+      setLoading(true);
+      await updateUsername(data).unwrap();
+      refetch();
+      toast.success("username updated");
+    } catch (error: any) {
+      toast.error(error.data.error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handlePasswordUpdate = async (e: FormEvent<HTMLFormElement>) => {
@@ -47,14 +56,17 @@ const UpdateForm = () => {
       newPassword: newPassword,
     };
     try {
-      const res = await updatePassword(data);
-      if ("error" in res) {
-        toast.error("Error");
-      } else {
-        toast.success("password updated");
-      }
-    } catch (err) {
+      setLoading(true);
+      await updatePassword(data).unwrap();
+      toast.success("Password updated");
+    } catch (err: any) {
+      toast.error(err.data.error);
       console.error(err);
+    } finally {
+      setNewPassword("");
+      setConfirmPassword("");
+      setCurrentPassword("");
+      setLoading(false);
     }
   };
 
@@ -81,7 +93,9 @@ const UpdateForm = () => {
           />
         </div>
         {usernameMenu && (
-          <form onSubmit={handleSubmit} className="flex flex-col gap-2 ">
+          <form
+            onSubmit={handleUsernameUpdate}
+            className="flex flex-col gap-2 ">
             <input
               value={username}
               onChange={(e) => setUsername(e.target.value)}
@@ -91,7 +105,7 @@ const UpdateForm = () => {
             />
 
             <button className="px-3 py-2 mt-4 bg-black text-white rounded-md">
-              Update
+              {loading ? <ClipLoader size={15} color="white" /> : "Update"}
             </button>
           </form>
         )}
@@ -137,25 +151,28 @@ const UpdateForm = () => {
             onSubmit={handlePasswordUpdate}
             className="flex flex-col gap-2 ">
             <input
+              value={currentPassword}
               onChange={(e) => setCurrentPassword(e.target.value)}
               type="text"
               placeholder="Current Password"
               className="p-2 border-b-4 focus:outline-none border-white bg-transparent"
             />
             <input
+              value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
               type="text"
               placeholder="New Password"
               className="p-2 border-b-4 focus:outline-none border-white bg-transparent"
             />
             <input
+              value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               type="text"
               placeholder="Confirm Password"
               className="p-2 border-b-4 focus:outline-none border-white bg-transparent"
             />
             <button className="px-3 py-2 mt-4 bg-black text-white rounded-md">
-              Update
+              {loading ? <ClipLoader size={15} color="white" /> : "Update"}
             </button>
           </form>
         )}

@@ -2,12 +2,14 @@
 import React, { use, useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import Image, { StaticImageData } from "next/image";
-import userImg from "@/public/images/user1.png";
+import { BiSolidPlusCircle } from "react-icons/bi";
 import { RxAvatar } from "react-icons/rx";
 import {
   useGetUserQuery,
   useUpdateCoverImageMutation,
   useUpdateProfileImageMutation,
+  useGetUserPostsQuery,
+  useGetPostsQuery,
 } from "@/redux/slices/apiSlice";
 import { useSession } from "next-auth/react";
 import ClipLoader from "react-spinners/ClipLoader";
@@ -23,13 +25,19 @@ interface UploadImageProps {
 const UploadImage: React.FC<UploadImageProps> = ({
   id,
   value,
+
   updateField,
   handleUpdate,
 }) => {
-  const { refetch, isLoading, isFetching } = useGetUserQuery(id);
+  const { refetch, isFetching, isLoading } = useGetUserQuery(id);
+  const { refetch: refetchUserPosts } = useGetUserPostsQuery(id);
+  const { refetch: refetchPosts } = useGetPostsQuery();
   const [updateCoverImage] = useUpdateCoverImageMutation();
   const [updateProfileImage] = useUpdateProfileImageMutation();
+  const [loading, setLoading] = useState<boolean>(false);
+
   console.log(id, updateField);
+
   const handleDrop = useCallback(
     async (files: any) => {
       const file = files[0];
@@ -40,9 +48,19 @@ const UploadImage: React.FC<UploadImageProps> = ({
           id: id,
           image: event.target.result,
         };
-        await handleUpdate(data);
-        await refetch();
-        toast.success(`${updateField} uploaded`);
+
+        try {
+          setLoading(true);
+          await handleUpdate(data).unwrap();
+          await refetch();
+          await refetchUserPosts();
+          await refetchPosts();
+          toast.success(`${updateField} uploaded`);
+        } catch (error) {
+          toast.error("Error");
+        } finally {
+          setLoading(false);
+        }
       };
 
       reader.readAsDataURL(file);
@@ -61,19 +79,14 @@ const UploadImage: React.FC<UploadImageProps> = ({
 
   return (
     <div
-      className="w-full h-full cursor-pointer  relative justify-center flex items-center"
+      className="h-full w-full rounded-full bg-black  flex justify-center items-center cursor-pointer "
       {...getRootProps()}>
-      {isLoading || isFetching ? (
-        <ClipLoader color="white absolute z-20" size={20} />
+      {loading || isLoading ? (
+        <ClipLoader color="white" size={22} />
       ) : (
-        <Image
-          src={value ? value : userImg}
-          height={100}
-          width={100}
-          alt="avatar"
-          {...getInputProps}
-          className={`${"w-full h-full"}   object-cover`}
-        />
+        <div {...getInputProps}>
+          <BiSolidPlusCircle className="text-white" size={22} />
+        </div>
       )}
     </div>
   );

@@ -8,10 +8,12 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import ClipLoader from "react-spinners/ClipLoader";
 import { Toaster } from "react-hot-toast";
+import { useGetPostsQuery } from "@/redux/slices/apiSlice";
 
 export default function Home() {
   const router = useRouter();
   const session = useSession();
+  const { data, isLoading } = useGetPostsQuery();
 
   useEffect(() => {
     if (session.status === "unauthenticated") {
@@ -27,16 +29,22 @@ export default function Home() {
     );
   }
   if (session.status === "authenticated") {
+    console.log(data);
     return (
       <>
         <Toaster />
-        <main className="mt-10 px-10 py-5  bg-neutral-900 h-full w-full flex flex-col gap-2">
-          <PostItem />
-          <PostItem />
-          <PostItem />
-          <PostItem />
-          <PostItem />
-          <PostItem />
+        <main className="mt-10 px-10 py-5  bg-neutral-900 min-h-screen w-full flex flex-col items-center justify-center gap-2">
+          {isLoading && <ClipLoader size={20} color="white" />}
+          {data?.map((post: any) => (
+            <PostItem
+              key={post.id}
+              id={post.id}
+              username={post.user.username}
+              createdAt={post.createdAt}
+              body={post.body}
+              profileImage={post.user.profileImage}
+            />
+          ))}
         </main>
       </>
     );

@@ -8,10 +8,14 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import ClipLoader from "react-spinners/ClipLoader";
 import { Toaster } from "react-hot-toast";
+import { useGetUserPostsQuery } from "@/redux/slices/apiSlice";
 
 const page = () => {
   const router = useRouter();
   const session = useSession();
+  const { data, isSuccess, isLoading } = useGetUserPostsQuery(
+    session?.data?.user as string
+  );
 
   useEffect(() => {
     if (session.status === "unauthenticated") {
@@ -32,7 +36,17 @@ const page = () => {
         <Toaster />
         <div className="mt-10 px-10 py-5 flex flex-col gap-2 bg-neutral-900">
           <UserBio />
-          <PostItem />
+          {isLoading && <ClipLoader size={20} color="white" />}
+          {data?.map((post: any) => (
+            <PostItem
+              key={post.id}
+              id={post.id}
+              username={post.user.username}
+              createdAt={post.createdAt}
+              body={post.body}
+              profileImage={post.user.profileImage}
+            />
+          ))}
         </div>
       </>
     );
