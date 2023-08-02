@@ -1,21 +1,15 @@
 "use client";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-type InitialState = {
-  value: AuthState;
-};
-
-type AuthState = {
+interface InitialState {
   id: string;
   authenticated: boolean;
-};
+}
 
-const initialState = {
-  value: {
-    id: "",
-    authenticated: false,
-  } as AuthState,
-} as InitialState;
+const initialState: InitialState = {
+  id: "",
+  authenticated: false,
+};
 
 export const AuthSlice = createSlice({
   name: "auth",
@@ -23,10 +17,8 @@ export const AuthSlice = createSlice({
   reducers: {
     logIn: (state, action) => {
       return {
-        value: {
-          id: action.payload,
-          authenticated: true,
-        },
+        id: action.payload.id,
+        authenticated: true,
       };
     },
     logOut: () => {

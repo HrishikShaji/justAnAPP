@@ -16,6 +16,7 @@ export const GET = async (req: NextRequest, res: NextResponse) => {
         email: true,
         profileImage: true,
         coverImage: true,
+        favouriteIds: true,
       },
     });
 

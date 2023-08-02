@@ -1,16 +1,17 @@
-"use client";
-
 import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useGetUserQuery } from "@/redux/slices/apiSlice";
 import { useAppSelector } from "@/redux/store";
+import { getToken } from "next-auth/jwt";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
-const Header = () => {
-  const session = useSession();
-
-  if (session.status !== "unauthenticated") {
+const Header = async () => {
+  const session = await getServerSession(authOptions);
+  console.log(session);
+  if (session) {
     return (
       <div className="p-2 bg-neutral-900 justify-center items-center flex text-black fixed w-full z-40 top-0 left-0">
         <div className="flex gap-4">

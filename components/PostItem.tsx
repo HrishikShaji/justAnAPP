@@ -13,6 +13,7 @@ interface PostItemProps {
   createdAt: string;
   body: string;
   profileImage: string;
+  userId: string;
 }
 
 const PostItem: React.FC<PostItemProps> = ({
@@ -21,12 +22,15 @@ const PostItem: React.FC<PostItemProps> = ({
   createdAt,
   body,
   profileImage,
+  userId,
 }) => {
   const router = useRouter();
   return (
-    <div className="w-full   rounded-3xl bg-neutral-700 p-5 flex flex-col gap-4">
+    <div className="w-full text-white  rounded-3xl bg-neutral-700 p-5 flex flex-col gap-4">
       <div className="flex gap-2 items-end">
-        <div className="h-14 w-14 rounded-full  bg-neutral-500">
+        <div
+          onClick={() => router.push(`/user/${userId}`)}
+          className="h-14 w-14 rounded-full cursor-pointer bg-neutral-500">
           <Image
             src={profileImage ? profileImage : userImg}
             height={100}
@@ -37,7 +41,9 @@ const PostItem: React.FC<PostItemProps> = ({
         </div>
         <div className="flex flex-col ">
           <h1 className="font-semibold">{username}</h1>
-          <span className="text-xs font-semibold">{createdAt}</span>
+          <span className="text-xs font-semibold text-gray-500">
+            {createdAt}
+          </span>
         </div>
       </div>
       <div
@@ -45,7 +51,7 @@ const PostItem: React.FC<PostItemProps> = ({
         className="cursor-pointer">
         <p>{body}</p>
       </div>
-      <LikeComment />
+      <LikeComment postId={id} />
     </div>
   );
 };

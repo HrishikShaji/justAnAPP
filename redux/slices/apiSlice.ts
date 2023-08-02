@@ -7,6 +7,7 @@ interface User {
   email?: string;
   profileImage?: string;
   coverImage?: string;
+  favouriteIds: string[];
 }
 
 interface Password {
@@ -38,6 +39,14 @@ interface Post {
   id: string;
   isAuth?: boolean;
   body: string;
+}
+
+interface Like {
+  postId: string;
+}
+
+interface Follow {
+  userId: string;
 }
 
 export const apiSlice = createApi({
@@ -114,6 +123,34 @@ export const apiSlice = createApi({
         body: { id: post.id, body: post.body },
       }),
     }),
+    addLike: builder.mutation<void, Like>({
+      query: (user) => ({
+        url: "/like",
+        method: "POST",
+        body: { postId: user.postId },
+      }),
+    }),
+    removeLike: builder.mutation<void, Like>({
+      query: (user) => ({
+        url: "/like",
+        method: "DELETE",
+        body: { postId: user.postId },
+      }),
+    }),
+    follow: builder.mutation<void, Follow>({
+      query: (user) => ({
+        url: "/follow",
+        method: "POST",
+        body: { userId: user.userId },
+      }),
+    }),
+    unFollow: builder.mutation<void, Follow>({
+      query: (user) => ({
+        url: "/follow",
+        method: "DELETE",
+        body: { userId: user.userId },
+      }),
+    }),
   }),
 });
 
@@ -128,4 +165,8 @@ export const {
   useAddPostMutation,
   useGetPostsQuery,
   useGetUserPostsQuery,
+  useAddLikeMutation,
+  useRemoveLikeMutation,
+  useFollowMutation,
+  useUnFollowMutation,
 } = apiSlice;

@@ -3,14 +3,41 @@ import React from "react";
 import { AiOutlineHeart, AiOutlineComment } from "react-icons/ai";
 import { useState } from "react";
 import { MdSend } from "react-icons/md";
+import {
+  useAddLikeMutation,
+  useGetPostQuery,
+  useRemoveLikeMutation,
+} from "@/redux/slices/apiSlice";
+import { useAppSelector } from "@/redux/store";
 
-const LikeComment = () => {
+interface LikeCommentProps {
+  postId: string;
+}
+const LikeComment: React.FC<LikeCommentProps> = ({ postId }) => {
+  const { id } = useAppSelector((state) => state.authReducer);
+  const { data, refetch } = useGetPostQuery(postId);
   const [commentMenu, setCommentMenu] = useState<boolean>(false);
-
+  const [likePost] = useAddLikeMutation();
+  const [unLikePost] = useRemoveLikeMutation();
+  const toggleLike = async () => {
+    if (data.likedIds.includes(id)) {
+      await unLikePost({ postId: postId });
+      await refetch();
+    } else {
+      await likePost({ postId: postId });
+      await refetch();
+    }
+  };
   return (
     <div>
       <div className="flex gap-4 items-center">
-        <AiOutlineHeart size={20} className="cursor-pointer" />
+        <AiOutlineHeart
+          onClick={toggleLike}
+          size={20}
+          className="cursor-pointer"
+        />
+        {data?.likedIds.length}
+
         <AiOutlineComment
           size={20}
           onClick={() => setCommentMenu(!commentMenu)}

@@ -34,7 +34,7 @@ const page = () => {
           <div>
             <p>{data.body}</p>
           </div>
-          <LikeComment />
+          <LikeComment postId={postId as string} />
         </div>
       )}
     </div>

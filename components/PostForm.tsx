@@ -1,5 +1,5 @@
 "use client";
-import { useAddPostMutation } from "@/redux/slices/apiSlice";
+import { useAddPostMutation, useGetPostsQuery } from "@/redux/slices/apiSlice";
 import { useSession } from "next-auth/react";
 import React, { FormEvent, useState } from "react";
 import { toast } from "react-hot-toast";
@@ -10,6 +10,7 @@ const PostForm = () => {
   const [body, setBody] = useState("");
   const [loading, setLoading] = useState<boolean>(false);
   const [addPost] = useAddPostMutation();
+  const { refetch } = useGetPostsQuery();
 
   const handleAddPost = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -21,6 +22,7 @@ const PostForm = () => {
       };
       setLoading(true);
       await addPost(data).unwrap();
+      await refetch();
       toast.success("Post Added");
     } catch (error: any) {
       toast.error(error.data.error);

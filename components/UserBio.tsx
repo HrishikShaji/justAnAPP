@@ -6,8 +6,10 @@ import { useDispatch } from "react-redux";
 import { AppDispatch, useAppSelector } from "@/redux/store";
 import { onOpen } from "@/redux/slices/ModalSlice";
 import {
+  useFollowMutation,
   useGetUserPostsQuery,
   useGetUserQuery,
+  useUnFollowMutation,
   useUpdateCoverImageMutation,
   useUpdateProfileImageMutation,
 } from "@/redux/slices/apiSlice";
@@ -18,17 +20,34 @@ import UploadImage from "./UploadImage";
 import Image from "next/image";
 import userImg from "@/public/images/user1.png";
 
-const UserBio = () => {
-  const dispatch = useDispatch<AppDispatch>();
-  const session = useSession();
-  const { data, isLoading, isSuccess, refetch, isFetching } = useGetUserQuery(
-    session.data?.user as string
-  );
+interface UserBioProps {
+  userId: string;
+}
 
+const UserBio: React.FC<UserBioProps> = ({ userId }) => {
+  const dispatch = useDispatch<AppDispatch>();
+  const { id } = useAppSelector((state) => state.authReducer);
+  const session = useSession();
+  const { data, isLoading, isSuccess, refetch, isFetching } =
+    useGetUserQuery(userId);
+  console.log(data);
   const [updateProfileImage] = useUpdateProfileImageMutation();
   const [updateCoverImage] = useUpdateCoverImageMutation();
+  const [follow] = useFollowMutation();
+  const [unFollow] = useUnFollowMutation();
+
   const handleSettingsModal = () => {
     dispatch(onOpen("Settings"));
+  };
+
+  const handleFollow = async () => {
+    if (data?.favouriteIds?.includes(id)) {
+      await unFollow({ userId: userId });
+      await refetch();
+    } else {
+      await follow({ userId: userId });
+      await refetch();
+    }
   };
 
   const handleBioModal = () => {
@@ -51,7 +70,7 @@ const UserBio = () => {
           <UploadImage
             value={data?.coverImage}
             updateField="coverImage"
-            id={session.data?.user as string}
+            id={userId}
             handleUpdate={updateCoverImage}
           />
         </div>
@@ -71,7 +90,7 @@ const UserBio = () => {
           <UploadImage
             value={data?.profileImage}
             updateField="profileImage"
-            id={session.data?.user as string}
+            id={userId}
             handleUpdate={updateProfileImage}
           />
         </div>
@@ -84,27 +103,35 @@ const UserBio = () => {
             (isSuccess && <h1>{data.email}</h1>)}
         </div>
         <div className="w-full flex gap-4 justify-center">
-          <h1>Followers</h1>
+          <h1>Followers : {data?.favouriteIds?.length}</h1>
           <h1>Following</h1>
           <h1>Posts</h1>
         </div>
-        <div className="w-full flex gap-4 justify-end">
-          <AiOutlineUser
-            className="cursor-pointer"
-            size={25}
-            onClick={handleBioModal}
-          />
-          <IoMdSettings
-            className="cursor-pointer"
-            size={25}
-            onClick={handleSettingsModal}
-          />
-          <IoMdLogOut
-            size={25}
-            className=" cursor-pointer"
-            onClick={() => signOut()}
-          />
-        </div>
+        {userId === id ? (
+          <div className="w-full flex gap-4 justify-end">
+            <AiOutlineUser
+              className="cursor-pointer"
+              size={25}
+              onClick={handleBioModal}
+            />
+            <IoMdSettings
+              className="cursor-pointer"
+              size={25}
+              onClick={handleSettingsModal}
+            />
+            <IoMdLogOut
+              size={25}
+              className=" cursor-pointer"
+              onClick={() => signOut()}
+            />
+          </div>
+        ) : (
+          <div className="w-full flex justify-end">
+            <button onClick={handleFollow}>
+              {data?.favouriteIds?.includes(id) ? "unFollow" : "Follow"}
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

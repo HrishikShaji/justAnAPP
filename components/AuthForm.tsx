@@ -1,3 +1,4 @@
+"use client";
 import { logIn } from "@/redux/slices/AuthSlice";
 import { signIn, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
@@ -11,28 +12,20 @@ const AuthForm = () => {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [confirmPassword, setConfirmPassword] = useState<string>("");
-
+  const session = useSession();
+  const dispatch = useDispatch();
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const url = isLogin ? "login" : "/api/auth/register";
     if (isLogin) {
-      const response = await signIn("credentials", { email, password });
-      console.log(response);
+      await signIn("credentials", { email, password });
     } else {
-      console.log(
-        "/api/auth/register",
-        username,
-        email,
-        password,
-        confirmPassword
-      );
       const response = await fetch(url, {
         method: "POST",
         body: JSON.stringify({ username, email, password }),
         headers: { "Content-Type": "application/json" },
       });
       await signIn("credentials", { email, password });
-      console.log(response);
     }
   };
 
