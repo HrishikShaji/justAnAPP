@@ -3,29 +3,6 @@ import prisma from "@/libs/prismadb";
 import bcrypt from "bcrypt";
 import { request } from "http";
 
-export const GET = async (req: NextRequest, res: NextResponse) => {
-  const id = req.nextUrl.searchParams.get("id");
-  try {
-    const user = await prisma.user.findUnique({
-      where: {
-        id: id as string,
-      },
-      select: {
-        id: true,
-        username: true,
-        email: true,
-        profileImage: true,
-        coverImage: true,
-        favouriteIds: true,
-      },
-    });
-
-    return NextResponse.json(user);
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
-  }
-};
-
 const handler = async (request: NextRequest) => {
   const endpoint = request.nextUrl.searchParams.get("endpoint");
 

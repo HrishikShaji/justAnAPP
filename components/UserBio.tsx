@@ -19,6 +19,7 @@ import ClipLoader from "react-spinners/ClipLoader";
 import UploadImage from "./UploadImage";
 import Image from "next/image";
 import userImg from "@/public/images/user1.png";
+import { toast } from "react-hot-toast";
 
 interface UserBioProps {
   userId: string;
@@ -27,9 +28,10 @@ interface UserBioProps {
 const UserBio: React.FC<UserBioProps> = ({ userId }) => {
   const dispatch = useDispatch<AppDispatch>();
   const { id } = useAppSelector((state) => state.authReducer);
-  const session = useSession();
-  const { data, isLoading, isSuccess, refetch, isFetching } =
-    useGetUserQuery(userId);
+  const { data, isLoading, isSuccess, refetch, isFetching } = useGetUserQuery(
+    userId as string
+  );
+  console.log("user is ", userId, "me is ", id);
   console.log(data);
   const [updateProfileImage] = useUpdateProfileImageMutation();
   const [updateCoverImage] = useUpdateCoverImageMutation();
@@ -41,12 +43,12 @@ const UserBio: React.FC<UserBioProps> = ({ userId }) => {
   };
 
   const handleFollow = async () => {
-    if (data?.favouriteIds?.includes(id)) {
+    if (data?.followerIds?.includes(id)) {
       await unFollow({ userId: userId });
-      await refetch();
+      toast.success(`unfollowed ${data.username} `);
     } else {
       await follow({ userId: userId });
-      await refetch();
+      toast.success(`following ${data?.username} `);
     }
   };
 
@@ -58,7 +60,7 @@ const UserBio: React.FC<UserBioProps> = ({ userId }) => {
       <div className="w-full rounded-3xl bg-neutral-600 overflow-hidden  flex justify-center h-[200px]">
         {isSuccess && (
           <Image
-            src={data?.coverImage ? data.coverImage : userImg}
+            src={data.user.coverImage ? data.user.coverImage : userImg}
             height={100}
             width={100}
             alt="avatar"
@@ -67,18 +69,20 @@ const UserBio: React.FC<UserBioProps> = ({ userId }) => {
         )}
 
         <div className="absolute top-8 right-8">
-          <UploadImage
-            value={data?.coverImage}
-            updateField="coverImage"
-            id={userId}
-            handleUpdate={updateCoverImage}
-          />
+          {id === userId && (
+            <UploadImage
+              value={data?.user?.coverImage}
+              updateField="coverImage"
+              id={userId}
+              handleUpdate={updateCoverImage}
+            />
+          )}
         </div>
       </div>
       <div className="absolute top-[100px] z-20 bg-neutral-500 w-40 h-40 rounded-full flex justify-center  items-center ">
         {isSuccess && (
           <Image
-            src={data?.profileImage ? data.profileImage : userImg}
+            src={data?.user?.profileImage ? data?.user?.profileImage : userImg}
             height={100}
             width={100}
             alt="avatar"
@@ -87,24 +91,26 @@ const UserBio: React.FC<UserBioProps> = ({ userId }) => {
         )}
 
         <div className="absolute top-3 right-3">
-          <UploadImage
-            value={data?.profileImage}
-            updateField="profileImage"
-            id={userId}
-            handleUpdate={updateProfileImage}
-          />
+          {id === userId && (
+            <UploadImage
+              value={data?.user?.profileImage}
+              updateField="profileImage"
+              id={userId}
+              handleUpdate={updateProfileImage}
+            />
+          )}
         </div>
       </div>
       <div className="w-full text-white mt-[50px] gap-4 flex flex-col justify-center items-center  ">
         <div className="flex flex-col items-center">
           {(isLoading && <ClipLoader size={20} color="white" />) ||
-            (isSuccess && <h1>{data.username}</h1>)}
+            (isSuccess && <h1>{data.user.username}</h1>)}
           {(isLoading && <ClipLoader size={20} color="white" />) ||
-            (isSuccess && <h1>{data.email}</h1>)}
+            (isSuccess && <h1>{data.user.email}</h1>)}
         </div>
         <div className="w-full flex gap-4 justify-center">
-          <h1>Followers : {data?.favouriteIds?.length}</h1>
-          <h1>Following</h1>
+          <h1>Followers : {data?.user?.followerIds.length}</h1>
+          <h1>Following : {data?.user?.followingIds.length}</h1>
           <h1>Posts</h1>
         </div>
         {userId === id ? (
@@ -128,7 +134,7 @@ const UserBio: React.FC<UserBioProps> = ({ userId }) => {
         ) : (
           <div className="w-full flex justify-end">
             <button onClick={handleFollow}>
-              {data?.favouriteIds?.includes(id) ? "unFollow" : "Follow"}
+              {data?.user?.followerIds?.includes(id) ? "unFollow" : "Follow"}
             </button>
           </div>
         )}

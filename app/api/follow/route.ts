@@ -12,32 +12,51 @@ const handler = async (request: NextRequest) => {
       where: { id: userId },
     });
 
+    const sender = await prisma.user.findUnique({
+      where: { id: currentUser.id },
+    });
+
     if (!user) {
       throw new Error("No post");
     }
 
-    let updatedFollowIds = [...(user.favouriteIds || [])];
+    let updatedFollowIds = [...(user.followerIds || [])];
+    let updatedFollowingIds = [...(sender?.followingIds || [])];
     if (request.method === "POST") {
       console.log("following");
       updatedFollowIds.push(currentUser.id);
+      updatedFollowingIds.push(userId);
     }
     if (request.method === "DELETE") {
       console.log("unfollowing");
       updatedFollowIds = updatedFollowIds.filter(
         (followId) => followId !== currentUser.id
       );
+      updatedFollowingIds = updatedFollowingIds.filter(
+        (followingId) => followingId !== userId
+      );
     }
+    console.log(updatedFollowingIds);
 
-    const updatedUser = await prisma.user.update({
+    await prisma.user.update({
       where: {
         id: userId,
       },
       data: {
-        favouriteIds: updatedFollowIds,
+        followerIds: updatedFollowIds,
       },
     });
 
-    return NextResponse.json(updatedUser);
+    await prisma.user.update({
+      where: {
+        id: currentUser.id,
+      },
+      data: {
+        followingIds: updatedFollowingIds,
+      },
+    });
+
+    return NextResponse.json("success");
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }

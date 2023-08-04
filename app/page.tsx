@@ -17,30 +17,22 @@ export default function Home() {
   const dispatch = useDispatch();
   const session = useSession();
   useEffect(() => {
-    console.log(session?.data?.user);
     dispatch(
       logIn({
         id: session?.data?.user as string,
         authenticated: true,
       })
     );
+    console.log(session?.data?.user);
   }, [session]);
-
+  console.log(data);
   return (
     <>
       <Toaster />
       <main className="mt-10 px-10 py-5  bg-neutral-900 min-h-screen w-full flex flex-col items-center justify-center gap-2">
         {isLoading && <ClipLoader size={20} color="white" />}
         {data?.map((post: any) => (
-          <PostItem
-            key={post.id}
-            id={post.id}
-            username={post.user.username}
-            createdAt={post.createdAt}
-            body={post.body}
-            userId={post.user.id}
-            profileImage={post.user.profileImage}
-          />
+          <PostItem key={post.id} id={post.id} />
         ))}
       </main>
     </>

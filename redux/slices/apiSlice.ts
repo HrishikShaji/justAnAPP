@@ -7,7 +7,8 @@ interface User {
   email?: string;
   profileImage?: string;
   coverImage?: string;
-  favouriteIds: string[];
+  followerIds: string[];
+  followingIds: string[];
 }
 
 interface Password {
@@ -52,76 +53,71 @@ interface Follow {
 export const apiSlice = createApi({
   reducerPath: "apiSlice",
   baseQuery: fetchBaseQuery({ baseUrl: "/api/" }),
+  tagTypes: ["Posts", "User"],
   endpoints: (builder) => ({
-    getUser: builder.query<User, string>({
-      query: (id) => `/user?id=${id}`,
+    getUser: builder.query<any, string>({
+      query: (id) => `/user/${id}`,
+      providesTags: ["User"],
     }),
     updateUsername: builder.mutation<void, Username>({
       query: (user: Username) => ({
-        url: `/user?endpoint=updateUsername`,
+        url: `/user/${user.id}`,
         method: "PUT",
         body: {
-          id: user.id,
           username: user.username,
         },
       }),
+      invalidatesTags: ["User"],
     }),
     updatePassword: builder.mutation<void, Password>({
       query: (password: Password) => ({
-        url: `/user?endpoint=updatePassword`,
+        url: `/user/${password.id}`,
         method: "PUT",
         body: {
-          id: password.id,
           currentPassword: password.currentPassword,
           newPassword: password.newPassword,
         },
       }),
     }),
-    updateEmail: builder.mutation<void, Email>({
-      query: (email: Email) => ({
-        url: `/user?endpoint=updateEmail`,
-        method: "PUT",
-        body: {
-          id: email.id,
-          email: email.email,
-        },
-      }),
-    }),
+
     updateProfileImage: builder.mutation<void, Image>({
       query: (image: Image) => ({
-        url: `/user?endpoint=updateProfileImage`,
+        url: `/user/${image.id}`,
         method: "PUT",
         body: {
-          id: image.id,
           profileImage: image.image,
         },
       }),
+      invalidatesTags: ["User"],
     }),
     updateCoverImage: builder.mutation<void, Image>({
       query: (image: Image) => ({
-        url: `/user?endpoint=updateCoverImage`,
+        url: `/user/${image.id}`,
         method: "PUT",
         body: {
-          id: image.id,
           coverImage: image.image,
         },
       }),
+      invalidatesTags: ["User"],
     }),
     getPost: builder.query<any, string>({
-      query: (id: string) => `/posts?postId=${id}`,
+      query: (id: string) => `/posts/${id}`,
+      providesTags: ["User"],
     }),
     getPosts: builder.query<any, void>({
       query: () => "/posts?endpoint=getPosts",
+      providesTags: ["Posts"],
     }),
     getUserPosts: builder.query<any, string>({
-      query: (id: string) => `/posts?endpoint=getPosts&userId=${id}`,
+      query: (id: string) => `/user/${id}`,
     }),
     addPost: builder.mutation<void, Post>({
       query: (post: Post) => ({
-        url: "/posts?endpoint=addPost",
+        url: `/posts/${post.id}`,
         method: "POST",
-        body: { id: post.id, body: post.body },
+        body: { body: post.body },
       }),
+      invalidatesTags: ["Posts"],
     }),
     addLike: builder.mutation<void, Like>({
       query: (user) => ({
@@ -129,6 +125,7 @@ export const apiSlice = createApi({
         method: "POST",
         body: { postId: user.postId },
       }),
+      invalidatesTags: ["User"],
     }),
     removeLike: builder.mutation<void, Like>({
       query: (user) => ({
@@ -136,6 +133,7 @@ export const apiSlice = createApi({
         method: "DELETE",
         body: { postId: user.postId },
       }),
+      invalidatesTags: ["User"],
     }),
     follow: builder.mutation<void, Follow>({
       query: (user) => ({
@@ -143,6 +141,7 @@ export const apiSlice = createApi({
         method: "POST",
         body: { userId: user.userId },
       }),
+      invalidatesTags: ["User"],
     }),
     unFollow: builder.mutation<void, Follow>({
       query: (user) => ({
@@ -150,6 +149,7 @@ export const apiSlice = createApi({
         method: "DELETE",
         body: { userId: user.userId },
       }),
+      invalidatesTags: ["User"],
     }),
   }),
 });
@@ -158,7 +158,6 @@ export const {
   useGetUserQuery,
   useUpdateUsernameMutation,
   useUpdatePasswordMutation,
-  useUpdateEmailMutation,
   useUpdateProfileImageMutation,
   useUpdateCoverImageMutation,
   useGetPostQuery,

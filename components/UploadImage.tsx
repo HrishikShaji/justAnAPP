@@ -24,14 +24,9 @@ interface UploadImageProps {
 
 const UploadImage: React.FC<UploadImageProps> = ({
   id,
-  value,
-
   updateField,
   handleUpdate,
 }) => {
-  const { refetch, isFetching, isLoading } = useGetUserQuery(id);
-  const { refetch: refetchUserPosts } = useGetUserPostsQuery(id);
-  const { refetch: refetchPosts } = useGetPostsQuery();
   const [updateCoverImage] = useUpdateCoverImageMutation();
   const [updateProfileImage] = useUpdateProfileImageMutation();
   const [loading, setLoading] = useState<boolean>(false);
@@ -52,9 +47,7 @@ const UploadImage: React.FC<UploadImageProps> = ({
         try {
           setLoading(true);
           await handleUpdate(data).unwrap();
-          await refetch();
-          await refetchUserPosts();
-          await refetchPosts();
+
           toast.success(`${updateField} uploaded`);
         } catch (error) {
           toast.error("Error");
@@ -65,7 +58,7 @@ const UploadImage: React.FC<UploadImageProps> = ({
 
       reader.readAsDataURL(file);
     },
-    [refetch, updateCoverImage, updateProfileImage, updateField]
+    [updateCoverImage, updateProfileImage, updateField]
   );
 
   const { getRootProps, getInputProps } = useDropzone({
@@ -81,7 +74,7 @@ const UploadImage: React.FC<UploadImageProps> = ({
     <div
       className="h-full w-full rounded-full bg-black  flex justify-center items-center cursor-pointer "
       {...getRootProps()}>
-      {loading || isLoading ? (
+      {loading ? (
         <ClipLoader color="white" size={22} />
       ) : (
         <div {...getInputProps}>

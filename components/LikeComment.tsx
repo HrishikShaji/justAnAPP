@@ -5,27 +5,24 @@ import { useState } from "react";
 import { MdSend } from "react-icons/md";
 import {
   useAddLikeMutation,
-  useGetPostQuery,
   useRemoveLikeMutation,
 } from "@/redux/slices/apiSlice";
 import { useAppSelector } from "@/redux/store";
 
 interface LikeCommentProps {
   postId: string;
+  likedIds: string[];
 }
-const LikeComment: React.FC<LikeCommentProps> = ({ postId }) => {
+const LikeComment: React.FC<LikeCommentProps> = ({ postId, likedIds }) => {
   const { id } = useAppSelector((state) => state.authReducer);
-  const { data, refetch } = useGetPostQuery(postId);
   const [commentMenu, setCommentMenu] = useState<boolean>(false);
   const [likePost] = useAddLikeMutation();
   const [unLikePost] = useRemoveLikeMutation();
   const toggleLike = async () => {
-    if (data.likedIds.includes(id)) {
+    if (likedIds.includes(id)) {
       await unLikePost({ postId: postId });
-      await refetch();
     } else {
       await likePost({ postId: postId });
-      await refetch();
     }
   };
   return (
@@ -36,7 +33,7 @@ const LikeComment: React.FC<LikeCommentProps> = ({ postId }) => {
           size={20}
           className="cursor-pointer"
         />
-        {data?.likedIds.length}
+        {likedIds?.length}
 
         <AiOutlineComment
           size={20}

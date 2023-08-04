@@ -1,11 +1,5 @@
-import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
-import { authOptions } from "./app/api/auth/[...nextauth]/route";
-import { authenticatedUser } from "./libs/authenticatedUser";
 import { getToken } from "next-auth/jwt";
-import { withAuth } from "next-auth/middleware";
-import { useDispatch } from "react-redux";
-import { logIn } from "./redux/slices/AuthSlice";
 
 export default async function middleware(request: NextRequest) {
   const { pathname, searchParams } = request.nextUrl;
@@ -14,7 +8,6 @@ export default async function middleware(request: NextRequest) {
     secret: process.env.NEXTAUTH_JWT_SECRET,
   });
 
-  console.log(token);
   if (token) {
   }
 
