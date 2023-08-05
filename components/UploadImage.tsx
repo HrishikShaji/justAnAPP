@@ -31,8 +31,6 @@ const UploadImage: React.FC<UploadImageProps> = ({
   const [updateProfileImage] = useUpdateProfileImageMutation();
   const [loading, setLoading] = useState<boolean>(false);
 
-  console.log(id, updateField);
-
   const handleDrop = useCallback(
     async (files: any) => {
       const file = files[0];

@@ -32,7 +32,7 @@ const UserBio: React.FC<UserBioProps> = ({ userId }) => {
     userId as string
   );
   console.log("user is ", userId, "me is ", id);
-  console.log(data);
+
   const [updateProfileImage] = useUpdateProfileImageMutation();
   const [updateCoverImage] = useUpdateCoverImageMutation();
   const [follow] = useFollowMutation();
@@ -60,7 +60,7 @@ const UserBio: React.FC<UserBioProps> = ({ userId }) => {
       <div className="w-full rounded-3xl bg-neutral-600 overflow-hidden  flex justify-center h-[200px]">
         {isSuccess && (
           <Image
-            src={data.user.coverImage ? data.user.coverImage : userImg}
+            src={data?.user?.coverImage ? data?.user?.coverImage : userImg}
             height={100}
             width={100}
             alt="avatar"
@@ -111,7 +111,7 @@ const UserBio: React.FC<UserBioProps> = ({ userId }) => {
         <div className="w-full flex gap-4 justify-center">
           <h1>Followers : {data?.user?.followerIds.length}</h1>
           <h1>Following : {data?.user?.followingIds.length}</h1>
-          <h1>Posts</h1>
+          <h1>Posts: {data?.posts.length}</h1>
         </div>
         {userId === id ? (
           <div className="w-full flex gap-4 justify-end">

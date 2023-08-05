@@ -11,23 +11,18 @@ export const GET = async (
   }
 ) => {
   const userId = params.userId;
+  const page = Number(request.nextUrl.searchParams.get("page"));
+  console.log("sexyyy", page, userId);
   try {
-    const user = await prisma.user.findUnique({
+    const count = await prisma.post.count({
       where: {
-        id: userId,
-      },
-      select: {
-        id: true,
-        username: true,
-        email: true,
-        profileImage: true,
-        coverImage: true,
-        followerIds: true,
-        followingIds: true,
+        userId: userId,
       },
     });
 
     const posts = await prisma.post.findMany({
+      skip: page === 0 ? 0 : page * 3,
+      take: 3,
       where: {
         userId: userId,
       },
@@ -38,7 +33,9 @@ export const GET = async (
         createdAt: "desc",
       },
     });
-    return NextResponse.json({ user, posts });
+
+    console.log(posts);
+    return NextResponse.json({ posts, count });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }

@@ -18,7 +18,7 @@ const PostItem: React.FC<PostItemProps> = ({ id }) => {
 
   const { data, isSuccess, isLoading } = useGetPostQuery(id);
   return (
-    <div className="w-full text-white  rounded-3xl bg-neutral-700 p-5 flex flex-col gap-4">
+    <div className="w-full min-h-[300px] text-white  rounded-3xl bg-neutral-700 p-5 flex flex-col gap-4">
       {isLoading && <ClipLoader color="white" size={20} />}
       {isSuccess && (
         <>

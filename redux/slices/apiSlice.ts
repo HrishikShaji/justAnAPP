@@ -50,10 +50,20 @@ interface Follow {
   userId: string;
 }
 
+interface Comment {
+  postId: string;
+  body: string;
+}
+
+interface UserPost {
+  id: string;
+  page: number;
+}
+
 export const apiSlice = createApi({
   reducerPath: "apiSlice",
   baseQuery: fetchBaseQuery({ baseUrl: "/api/" }),
-  tagTypes: ["Posts", "User"],
+  tagTypes: ["Posts", "User", "Comments"],
   endpoints: (builder) => ({
     getUser: builder.query<any, string>({
       query: (id) => `/user/${id}`,
@@ -104,12 +114,32 @@ export const apiSlice = createApi({
       query: (id: string) => `/posts/${id}`,
       providesTags: ["User"],
     }),
-    getPosts: builder.query<any, void>({
-      query: () => "/posts?endpoint=getPosts",
+    getPosts: builder.query<any, number>({
+      query: (page: number) => `/posts?page=${page}`,
+      serializeQueryArgs: ({ endpointName }) => {
+        return endpointName;
+      },
+      merge: (currentCache, newItems) => {
+        console.log("from redux", currentCache, newItems);
+        currentCache.posts.push(...newItems.posts);
+      },
+      forceRefetch({ currentArg, previousArg }) {
+        return currentArg !== previousArg;
+      },
       providesTags: ["Posts"],
     }),
-    getUserPosts: builder.query<any, string>({
-      query: (id: string) => `/user/${id}`,
+    getUserPosts: builder.query<any, UserPost>({
+      query: ({ id, page }) => `/user/${id}?page=${page}`,
+      serializeQueryArgs: ({ endpointName }) => {
+        return endpointName;
+      },
+      merge: (currentCache, newItems) => {
+        console.log("from redux", currentCache, newItems);
+        currentCache.posts.push(...newItems.posts);
+      },
+      forceRefetch({ currentArg, previousArg }) {
+        return currentArg !== previousArg;
+      },
     }),
     addPost: builder.mutation<void, Post>({
       query: (post: Post) => ({
@@ -151,6 +181,18 @@ export const apiSlice = createApi({
       }),
       invalidatesTags: ["User"],
     }),
+    getComments: builder.query<any, string>({
+      query: (postId: string) => `/comment/${postId}`,
+      providesTags: ["Comments"],
+    }),
+    addComment: builder.mutation<void, Comment>({
+      query: (comment) => ({
+        url: "/comment",
+        method: "POST",
+        body: { postId: comment.postId, body: comment.body },
+      }),
+      invalidatesTags: ["Comments"],
+    }),
   }),
 });
 
@@ -168,4 +210,6 @@ export const {
   useRemoveLikeMutation,
   useFollowMutation,
   useUnFollowMutation,
+  useGetCommentsQuery,
+  useAddCommentMutation,
 } = apiSlice;
